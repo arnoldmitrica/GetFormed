@@ -31,6 +31,7 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     final formBox = Hive.box(email);
 
     return Scaffold(
@@ -39,7 +40,6 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
         ),
         body: formBox.isNotEmpty
             ? Container(
-                alignment: Alignment.center,
                 child: ValueListenableBuilder(
                     valueListenable: Hive.box(email).listenable(),
                     builder: (valueContext, form, child) {
@@ -47,37 +47,49 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
                           itemCount: formBox.length,
                           itemBuilder: (BuildContext listContext, int index) {
                             final form = formBox.getAt(index) as FormModel;
-                            File image;
-                            try {
-                              final val =
-                                  File(form.values["imagePath"]).existsSync();
-                              if (val == false) {
-                                image = null;
-                                throw ErrorDescription("No image");
-                              } else {
-                                image = File(form.values["imagePath"]);
-                              }
-                            } catch (err) {
-                              print(err.toString());
-                            }
                             //final form = formBox[index];
                             return Dismissible(
-                              key: UniqueKey(),
-                              onDismissed: (direction) {
-                                // Remove the item from the data source.
-                                setState(() {
-                                  formBox.deleteAt(index);
-                                });
-                              },
-                              background: Container(
-                                color: Colors.red,
-                              ),
-                              child: InkWell(
-                                onTap: () => showFormValidationDialog(
-                                    context, form.values["completed"], index),
-                                child: Cardlist(form, image),
-                              ),
-                            );
+                                key: UniqueKey(),
+                                onDismissed: (direction) {
+                                  // Remove the item from the data source.
+                                  setState(() {
+                                    formBox.deleteAt(index);
+                                  });
+                                },
+                                background: Container(
+                                  color: Colors.red,
+                                ),
+                                child: InkWell(
+                                  onTap: () => showFormValidationDialog(
+                                      context, form.values["completed"], index),
+                                  child: Container(
+                                    constraints:
+                                        BoxConstraints(minWidth: size.width),
+                                    child: FutureBuilder(
+                                        future: _checkPhoto(
+                                            form.values["imagePath"]),
+                                        builder: (listViewBuilderContext,
+                                            AsyncSnapshot<bool> snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            print(
+                                                "snapshotData is ${snapshot.data}");
+                                            if (snapshot.hasError)
+                                              return Text(
+                                                  snapshot.error.toString());
+                                            else {
+                                              return snapshot.data == true
+                                                  ? Cardlist(
+                                                      form,
+                                                      File(form
+                                                          .values["imagePath"]))
+                                                  : Cardlist(form, null);
+                                            }
+                                          } else
+                                            return CircularProgressIndicator();
+                                        }),
+                                  ),
+                                ));
                           });
                     }),
               )
@@ -123,6 +135,11 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
             ),
           ]),
     );
+  }
+
+  Future<bool> _checkPhoto(String path) async {
+    print("path is $path");
+    return path == null ? Future.value(false) : await File(path).exists();
   }
 }
 

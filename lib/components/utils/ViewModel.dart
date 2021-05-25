@@ -58,6 +58,9 @@ class ViewModel extends ChangeNotifier {
       model.values[keyMap] = null;
       model.values["completed"] -= 1;
     }
+    if (model.values[keyMap] != null && value != null) {
+      model.values[keyMap] = value.toString();
+    }
     notifyListeners();
     _updateDB();
   }

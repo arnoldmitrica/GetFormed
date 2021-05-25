@@ -16,40 +16,49 @@ class GetImage extends StatefulWidget {
 
 class _GetImageState extends State<GetImage> {
   File _image;
+  bool checkPhoto;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      checkPhoto == false
+          ? Provider.of<ViewModel>(context, listen: false)
+              .updateCompletePercentState("imagePath", null)
+          : null;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: size.width / 8),
-      child: Consumer<ViewModel>(builder: (imageContext, form, child) {
-        Image image;
-        try {
-          final val = File(form.model.values["imagePath"]).existsSync();
-          if (val == false) {
-            _image = null;
-            throw ErrorDescription("No image");
-          } else {
-            _image = File(form.model.values["imagePath"]);
-          }
-        } catch (err) {
-          print(err.toString());
-        }
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () => _getFromGallery(),
-              child: Text("Upload image"),
-            ),
-            _image == null
-                ? Text('No image selected.')
-                //Provider.of<ViewModel>(imageContext, listen: false)
-                //.updateCompletePercentState("imagePath", null)
-                : Image.file(_image),
-          ],
-        );
-      }),
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: () => _getFromGallery(),
+          child: Text("Upload image"),
+        ),
+        Consumer<ViewModel>(builder: (imageContext, form, child) {
+          return FutureBuilder(
+              future: _checkPhoto(form.model.values["imagePath"]),
+              builder: (context, AsyncSnapshot<bool> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  print("snapshotData is ${snapshot.data}");
+                  if (snapshot.hasError)
+                    return Text(snapshot.error.toString());
+                  else {
+                    return snapshot.data == true
+                        ? Image.file(File(form.model.values["imagePath"]))
+                        : Text("No image selected");
+                  }
+                } else
+                  return CircularProgressIndicator();
+              });
+        })
+      ],
     );
   }
 
@@ -66,5 +75,11 @@ class _GetImageState extends State<GetImage> {
       Provider.of<ViewModel>(context, listen: false)
           .updateCompletePercentState("imagePath", pickedFile.path);
     }
+  }
+
+  Future<bool> _checkPhoto(String path) async {
+    print("path is $path");
+    checkPhoto = path != null ? await File(path).exists() : false;
+    return path == null ? Future.value(false) : checkPhoto;
   }
 }
