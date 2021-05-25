@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mi_card/Screens/HomeScreen/loggedInHomeScreen.dart';
 import 'package:mi_card/Screens/Login/components/background.dart';
 import 'package:mi_card/Screens/Signup/signup_screen.dart';
 import 'package:mi_card/components/already_have_an_account_check.dart';
@@ -25,6 +26,7 @@ class _BodyState extends State<Body> {
   TextEditingController username = TextEditingController();
 
   TextEditingController password = TextEditingController();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool checkValue = false;
   SharedPreferences sharedPreferences;
 
@@ -73,19 +75,35 @@ class _BodyState extends State<Body> {
             SizedBox(
               height: size.height * 0.03,
             ),
-            RoundedInputField(
-              hintText: "Your Email",
-              onChanged: (value) {
-                username.text = value;
-              },
-            ),
-            RoundedPasswordField(
-              onChanged: (value) {
-                password.text = value;
-              },
+            Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  RoundedInputField(
+                    func: nameValidator,
+                    hintText: "Your username",
+                    onChanged: (value) {
+                      username.text = value;
+                    },
+                  ),
+                  RoundedPasswordField(
+                    func: passValidator,
+                    onChanged: (value) {
+                      password.text = value;
+                    },
+                  ),
+                ],
+              ),
             ),
             RoundedButton(
+              color: Colors.blue[200],
               text: "LOGIN",
+              textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Newsreader'),
               press: () => _navigator(),
             ),
             SizedBox(
@@ -101,7 +119,10 @@ class _BodyState extends State<Body> {
                     ),
                     color: Colors.white.withOpacity(0.8),
                   )
-                : Container(),
+                : Container(
+                    width: 0,
+                    height: 0,
+                  ),
             AlreadyHaveAnAccountCheck(
               press: () {
                 Navigator.push(
@@ -120,8 +141,28 @@ class _BodyState extends State<Body> {
     );
   }
 
+  Function(String) nameValidator = (String name) {
+    if (name.isEmpty) {
+      return "Name must not be empty ";
+    }
+    if (name.length < 3) return "Name must have more than 3 characters";
+    if (name.contains("  ") || (name.contains(" ")))
+      return "Name must not have empty spaces";
+    return null;
+  };
+
+  Function(String) passValidator = (String pass) {
+    if (pass.isEmpty) {
+      return "Password must not be empty";
+    }
+    return null;
+  };
+
   _navigator() async {
-    if (username.text.length != 0 || password.text.length != 0) {
+    if (_formKey.currentState.validate()) {
+      setState(() {
+        isLoading = true;
+      });
       try {
         await getCrdntialsForLogin(username.text);
         Fluttertoast.showToast(
@@ -132,6 +173,7 @@ class _BodyState extends State<Body> {
           backgroundColor: Colors.green[300],
           //timeInSecForIosWeb: 2,
         );
+        await _setAccount();
       } catch (err) {
         print(err.toString());
         Fluttertoast.showToast(
@@ -143,25 +185,21 @@ class _BodyState extends State<Body> {
           //timeInSecForIosWeb: 2,
         );
       }
-    } else {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return CupertinoAlertDialog(
-              content: Text(
-                "username or password \ncan't be empty",
-                style: TextStyle(fontSize: 16.0),
-              ),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      print("Login pressed");
-                    },
-                    child: Text("Ok"))
-              ],
-            );
-          });
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  _setAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("email", username.text);
+    Navigator.pushReplacement<void, void>(
+      context,
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) =>
+            LoggedInHomeScreen(email: username.text),
+      ),
+    );
   }
 }

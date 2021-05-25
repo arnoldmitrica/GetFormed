@@ -1,252 +1,88 @@
-import 'dart:html';
 import 'dart:io';
-
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mi_card/components/rounded_button.dart';
+import 'package:mi_card/Screens/FormPartOne/components/time_drawer.dart';
+import 'package:mi_card/Screens/FormPartTwo/components/getImage.dart';
+import 'package:mi_card/Screens/FormPartTwo/components/location.dart';
+import 'package:mi_card/Screens/FormPartTwo/components/title_job.dart';
+import 'package:mi_card/components/completedWidget.dart';
 import 'package:mi_card/components/rounded_input_field.dart';
-import 'package:mi_card/components/utils/formModel.dart';
-import 'package:mi_card/components/utils/locationDataModel.dart';
-import 'package:mi_card/constants.dart';
+import 'package:mi_card/components/utils/ViewModel.dart';
+import 'package:mi_card/components/utils/listItemModel.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
-import 'package:location/location.dart';
+import 'dart:async';
+import 'dart:math';
+import 'package:mi_card/Screens/FormPartTwo/components/form_page.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 
 class FormPartTwo extends StatefulWidget {
-  FormPartTwo({Key key}) : super(key: key);
+  final int index;
+  final String email;
+  FormPartTwo(this.email, this.index, {Key key}) : super(key: key);
 
   @override
-  _FormPartOneState createState() => _FormPartOneState();
+  _FormPartTwoState createState() => _FormPartTwoState(email, index);
 }
 
-class _FormPartOneState extends State<FormPartTwo> {
-  File _image;
+class _FormPartTwoState extends State<FormPartTwo> {
+  Box<dynamic> box;
+  int index;
+  String email;
+  _FormPartTwoState(this.email, this.index, {this.box}) {
+    if (index != null) {
+      print('index = $index');
+    }
+  }
 
-  String _location;
-
-  Location _location;
+  Random random = Random();
 
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController cnp = TextEditingController();
   TextEditingController jobTitle = TextEditingController();
+  TextEditingController income = TextEditingController();
 
-  String marritalStatus = "Single";
+  @override
+  void dispose() {
+    firstName.dispose();
+    lastName.dispose();
+    cnp.dispose();
+    jobTitle.dispose();
+    super.dispose();
+  }
+
+  bool workGroup = false;
 
   double itemsCompleted = 0;
 
-  double calculateProgress() {
-    return 0.4 / (itemsCompleted);
-  }
-
-  Widget getFirstNameButton() {
-    return RoundedInputField(
-        hintText: "First Name",
-        onChanged: (value) {
-          firstName.text = value;
-        });
-  }
-
-  Widget getLastName() {
-    return RoundedInputField(
-      hintText: "Last name",
-      onChanged: (value) {
-        lastName.text = value;
-      },
-    );
-  }
-
-  Widget getCNP() {
-    return RoundedInputField(
-      hintText: "CNP",
-      onChanged: (value) {
-        cnp.text = value;
-      },
-    );
-  }
-
-  Widget getStareCivila() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Marrital status:"),
-        SizedBox(
-          width: 10,
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Single"),
-              Radio(
-                  value: "Single",
-                  groupValue: marritalStatus,
-                  onChanged: (val) {
-                    marritalStatus = val;
-                    setState(() {});
-                  }),
-              Text("Married"),
-              Radio(
-                  value: "Married",
-                  groupValue: marritalStatus,
-                  onChanged: (val) {
-                    marritalStatus = val;
-                    setState(() {});
-                  }),
-              Text("Divorced"),
-              Radio(
-                  value: "Divorced",
-                  groupValue: marritalStatus,
-                  onChanged: (val) {
-                    marritalStatus = val;
-                    setState(() {});
-                  }),
-            ],
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget getWorkingStatus() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Are you working?"),
-        SizedBox(
-          width: 10,
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Yes"),
-              Radio(
-                  value: true,
-                  groupValue: marritalStatus,
-                  onChanged: (val) {
-                    marritalStatus = val;
-                    setState(() {});
-                  }),
-              Text("No"),
-              Radio(
-                  value: false,
-                  groupValue: marritalStatus,
-                  onChanged: (val) {
-                    marritalStatus = val;
-                    setState(() {});
-                  }),
-            ],
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget getSubmitButton() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 45.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        child: TextButton(
-            child: Text("Validate".toUpperCase()),
-            style: ButtonStyle(
-                padding:
-                    MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
-                foregroundColor:
-                    MaterialStateProperty.all<Color>(Colors.blue[600]),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(color: Colors.blue[600])))),
-            onPressed: () => print("Form part two")),
-      ),
-    );
-  }
-
-  Widget getTitleJob() {
-    return RoundedInputField(
-        hintText: "Your job title",
-        onChanged: (value) {
-          jobTitle.text = value;
-        });
-  }
-
-  Widget getEarnings() {
-    final size = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: size / 8),
-      child: Container(
-        alignment: Alignment.centerLeft,
-        child: TextField(
-          decoration: InputDecoration(
-              labelText: "What is your monthly earnings? (RON)"),
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly,
-          ], // Only numbers can be entered
-        ),
-      ),
-    );
-  }
-
-  Widget getImage() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            _getFromGallery();
-          },
-          child: Text("Upload image"),
-        ),
-        _image == null ? Text('No image selected.') : Image.file(_image),
-      ],
-    );
-  }
-
-  Widget getLocation() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            _getFromGallery();
-          },
-          child: Text("Get location"),
-        ),
-        _image == null ? Text('No image selected.') : Image.file(_image),
-      ],
-    );
-  }
-
-  List<Widget> renderForm() {
-    return [
-      getFirstNameButton(),
-      getLastName(),
-      getCNP(),
-      getStareCivila(),
-      getWorkingStatus(),
-      getTitleJob(),
-      getEarnings(),
-      getImage(),
-    ];
-  }
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    // SystemChrome.setEnabledSystemUIOverlays([]);
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //   statusBarColor: Colors.transparent,
+    // ));
     final double topBottom = 70;
-    double maxCompleted = 0.4 / 3;
+    double maxCompleted;
     final size = MediaQuery.of(context).size.height;
-    return MaterialApp(
-      theme: buildThemeDataLightMode(),
-      darkTheme: buildThemeDataDarkMode(),
-      home: Scaffold(
-        body: Padding(
-          padding: EdgeInsets.only(top: size / 10),
+    box = Hive.box(email);
+    return buildScaffoldPartTwo(size, topBottom, maxCompleted);
+  }
+
+  Scaffold buildScaffoldPartTwo(
+      double size, double topBottom, double maxCompleted) {
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.only(top: size / 10),
+        child: GestureDetector(
+          onTap: () {
+            //FocusScope.of(context).unfocus();
+          },
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -255,9 +91,8 @@ class _FormPartOneState extends State<FormPartTwo> {
                   padding: EdgeInsets.only(bottom: topBottom),
                   child: MultiProvider(
                     providers: [
-                      //ChangeNotifierProvider(create: (context) => FormModel()),
                       ChangeNotifierProvider(
-                          create: (context) => StateFormModel())
+                          create: (context) => ViewModel(box, index))
                     ],
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -272,13 +107,16 @@ class _FormPartOneState extends State<FormPartTwo> {
                               fontSize: topBottom - 20,
                               color: Colors.blueGrey[700]),
                         ),
-                        Consumer<StateFormModel>(
-                          builder: (context, model, child) {
-                            final double val = model.getNumber;
+                        Consumer<ViewModel>(
+                          builder: (context, form, child) {
+                            final double val =
+                                form.model.values["completed"] / 12;
+
+                            maxCompleted = val * 100;
 
                             return LinearProgressIndicator(
                               minHeight: 5,
-                              value: val * 0.4 / 3,
+                              value: val,
                             );
                           },
                         ),
@@ -290,7 +128,10 @@ class _FormPartOneState extends State<FormPartTwo> {
                           height: 50,
                         ),
                         //style: Theme.of(context).textTheme.headline2),
-                        formPartOneBody(),
+                        Form(
+                            key: _formKey,
+                            //autovalidateMode: AutovalidateMode.onUserInteraction,
+                            child: formPartTwoBody()),
                       ],
                     ),
                   ),
@@ -304,55 +145,7 @@ class _FormPartOneState extends State<FormPartTwo> {
     );
   }
 
-  ThemeData buildThemeDataDarkMode() {
-    return ThemeData(
-      // Define the default brightness and colors.
-      brightness: Brightness.dark,
-      primaryColor: Colors.lightBlue[800],
-      accentColor: Colors.cyan[600],
-      textTheme: TextTheme(
-        headline1: TextStyle(
-            fontSize: 72.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue[100]),
-        headline6: TextStyle(
-            fontSize: 36.0,
-            fontStyle: FontStyle.italic,
-            color: Colors.blue[100]),
-        bodyText2: TextStyle(
-            fontSize: 14.0, fontFamily: 'Newsreader', color: Colors.blue[400]),
-        bodyText1: TextStyle(
-            fontSize: 14.0, fontFamily: 'Newsreader', color: Colors.blue[400]),
-      ),
-    );
-  }
-
-  ThemeData buildThemeDataLightMode() {
-    return ThemeData(
-      // Define the default brightness and colors.
-      brightness: Brightness.light,
-      primaryColor: Colors.deepPurple[300],
-      accentColor: Colors.cyan[600],
-      //fontFamily: 'Newsreader',
-      textTheme: TextTheme(
-        headline1: TextStyle(
-            fontSize: 72.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue[100]),
-        headline2: TextStyle(fontSize: 32, fontFamily: 'Newsreader'),
-        headline6: TextStyle(
-            fontSize: 36.0,
-            fontStyle: FontStyle.italic,
-            color: Colors.blue[100]),
-        bodyText2: TextStyle(
-            fontSize: 14.0, fontFamily: 'Newsreader', color: Colors.black),
-        bodyText1: TextStyle(
-            fontSize: 14.0, fontFamily: 'Newsreader', color: Colors.black87),
-      ),
-    );
-  }
-
-  Column formPartOneBody() {
+  Column formPartTwoBody() {
     return Column(
         //alignment: Alignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -372,6 +165,392 @@ class _FormPartOneState extends State<FormPartTwo> {
         ]);
   }
 
+  List<Widget> renderForm() {
+    return [
+      getFirstNameButton(),
+      getLastName(),
+      getCNP(),
+      getStareCivila(),
+      getWorkingStatus(),
+      getTitleJob(),
+      getDomain(),
+      getEarnings(),
+      getImage(),
+      getLocation(),
+      SizedBox(
+        height: 35,
+      ),
+      getNavigationButtons()
+    ];
+  }
+
+  Widget getFirstNameButton() {
+    print("firstNameeee");
+
+    return Builder(builder: (firstNamecontext) {
+      return FocusScope(
+        onFocusChange: (focus) {
+          if (focus == false) {
+            print("lost focus firstname");
+            Provider.of<ViewModel>(firstNamecontext, listen: false)
+                .updateCompletePercentState("firstName", firstName.text);
+          }
+        },
+        child: RoundedInputField(
+            initialValue:
+                Provider.of<ViewModel>(firstNamecontext, listen: false)
+                    .model
+                    .values["firstName"],
+            func: nameValidator,
+            hintText: "First Name",
+            onChanged: (value) {
+              firstName.text = value;
+            }),
+      );
+    });
+  }
+
+  Function(String) nameValidator = (String name) {
+    if (name.isNotEmpty && name.length > 2) {
+      print('name $name');
+      return null;
+    } else {
+      return "Name is invalid";
+    }
+  };
+
+  Widget getLastName() {
+    print("lastNameee");
+    return Builder(builder: (lastNamecontext) {
+      return FocusScope(
+        onFocusChange: (focus) {
+          if (focus == false) {
+            print("lost focus lastname");
+            Provider.of<ViewModel>(lastNamecontext, listen: false)
+                .updateCompletePercentState("lastName", lastName.text);
+          }
+        },
+        child: RoundedInputField(
+            initialValue: Provider.of<ViewModel>(lastNamecontext, listen: false)
+                .model
+                .values["lastName"],
+            func: nameValidator,
+            hintText: "Last Name",
+            onChanged: (value) {
+              lastName.text = value;
+            }),
+      );
+    });
+  }
+
+  Widget getCNP() {
+    final size = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: size / 8),
+      child: Container(
+          alignment: Alignment.centerLeft,
+          child: Builder(builder: (cnpContext) {
+            cnp.text = Provider.of<ViewModel>(cnpContext, listen: false)
+                .model
+                .values["cnp"];
+            return FocusScope(
+              onFocusChange: (focus) {
+                if (focus == false) {
+                  Provider.of<ViewModel>(cnpContext, listen: false)
+                      .updateCompletePercentState("cnp", cnp.text);
+                }
+              },
+              child: TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) {
+                  if (value.length == 13) {
+                    return null;
+                  } else {
+                    return "Enter a 13-digit number CNP";
+                  }
+                },
+                controller: cnp,
+                decoration: InputDecoration(labelText: "CNP"),
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ], // Only numbers can be entered
+              ),
+            );
+          })),
+    );
+  }
+
+  Widget getStareCivila() {
+    final List<ListItem> list = [
+      ListItem("Single", 1),
+      ListItem("Married", 2),
+      ListItem("Divorced", 3),
+    ];
+    return ItemDrawer.list(
+      list,
+      "Select your status:",
+      keyMap: "status",
+    );
+  }
+
+  Widget getWorkingStatus() {
+    final List<ListItem> list = [
+      ListItem("Yes", 1),
+      ListItem("No", 2),
+    ];
+    return ItemDrawer.list(
+      list,
+      "Do you work?",
+      keyMap: "work",
+    );
+  }
+
+  Widget getNavigationButtons() {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      getValidateButton(),
+      getCloseButton(),
+    ]);
+  }
+
+  Padding getValidateButton() {
+    Size size = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(left: size.width / 8),
+      child: Builder(builder: (buildercontext) {
+        return Container(
+          child: Consumer<ViewModel>(builder: (context, form, child) {
+            return TextButton(
+                child: Text("Validate".toUpperCase()),
+                style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.only(
+                            left: size.width / 8,
+                            right: size.width / 8,
+                            top: 15,
+                            bottom: 15)),
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.blue[600]),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: BorderSide(color: Colors.blue[600])))),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  if (_formKey.currentState.validate() &&
+                      form.model.values["completed"] == 13) {
+                    if (random.nextInt(10) < 6) {
+                      showDialog(context, "Your current form was not accepted");
+                    } else {
+                      showDialog(context, "Your current form is accepted");
+                    }
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: "Fill all the form.",
+                        gravity: ToastGravity.BOTTOM,
+                        fontSize: 20,
+                        textColor: Colors.white,
+                        backgroundColor: Colors.pink[400]);
+                  }
+                });
+          }),
+        );
+      }),
+    );
+  }
+
+  Widget getCloseButton() {
+    Size size = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(right: size.width / 8),
+      child: Container(
+        child: TextButton(
+            child: Text("Close".toUpperCase()),
+            style: ButtonStyle(
+                padding:
+                    MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                foregroundColor:
+                    MaterialStateProperty.all<Color>(Colors.purple[200]),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.purple[200])))),
+            onPressed: () {
+              showCloseDialog(context, "Go back to first validation or exit.");
+            }),
+      ),
+    );
+  }
+
+  Future<dynamic> showDialog(BuildContext context, String text, {int val}) {
+    return showPlatformDialog(
+      context: context,
+      builder: (dialogContext) {
+        print('val = $val');
+        if (val != null && val <= 12 && val >= 11) {
+          return BasicDialogAlert(
+            title: Text("Make sure to upload image and location."),
+            content: Text(text),
+            actions: <Widget>[
+              BasicDialogAction(
+                title: Text("Close"),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+            ],
+          );
+        } else {
+          if (val == null) {
+            return BasicDialogAlert(
+              title: Text("Form result"),
+              content: Text(text),
+              actions: <Widget>[
+                BasicDialogAction(
+                  title: Text("Close dialog"),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+                BasicDialogAction(
+                  title: Text("Back to homescreen"),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          }
+        }
+      },
+    );
+  }
+
+  Future<dynamic> showCloseDialog(BuildContext context, String text) {
+    return showPlatformDialog(
+      context: context,
+      builder: (dialogContext) => BasicDialogAlert(
+        title: Text("Exit form."),
+        content: Text(text),
+        actions: <Widget>[
+          BasicDialogAction(
+            title: Text("Back"),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.pop(context);
+            },
+          ),
+          BasicDialogAction(
+            title: Text("Close"),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getTitleJob() {
+    print("titleJobbbbbbeeeeeee");
+    return Builder(builder: (titleContext) {
+      print("titleJobbbbbb");
+      // jobTitle.text = Provider.of<ViewModel>(titleContext, listen: false)
+      //     .model
+      //     .values["jobTitle"];
+      return FocusScope(
+        onFocusChange: (focus) {
+          if (focus == false) {
+            Provider.of<ViewModel>(titleContext, listen: false)
+                .updateCompletePercentState("jobTitle", jobTitle.text);
+          }
+        },
+        child: RoundedInputField(
+            initialValue: Provider.of<ViewModel>(titleContext, listen: false)
+                .model
+                .values["jobTitle"],
+            func: nameValidator,
+            hintText: "Your job title",
+            onChanged: (value) {
+              jobTitle.text = value;
+            }),
+      );
+    });
+  }
+
+  Widget getDomain() {
+    final List<ListItem> list = [
+      ListItem("Muncitori tehnicieni", 1),
+      ListItem("Office jobs", 2),
+      ListItem("Inginerie", 3),
+      ListItem("IT Telecom", 4),
+      ListItem("Servicii", 5),
+      ListItem("Finante", 6),
+      ListItem("Marketing", 7),
+      ListItem("Sanatate", 8),
+      ListItem("Institutii sau profesii libere", 9),
+      ListItem("Vanzari", 10),
+    ];
+    return ItemDrawer.list(
+      list,
+      "Select your field domain:",
+      keyMap: "domain",
+    );
+  }
+
+  Widget getEarnings() {
+    final size = MediaQuery.of(context).size.width;
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: size / 8),
+        child: Container(
+            alignment: Alignment.centerLeft,
+            child: Builder(builder: (incomeContext) {
+              income.text = Provider.of<ViewModel>(incomeContext, listen: false)
+                  .model
+                  .values["income"];
+
+              return FocusScope(
+                onFocusChange: (value) {
+                  if (value == false) {
+                    Provider.of<ViewModel>(incomeContext, listen: false)
+                        .updateCompletePercentState("income", income.text);
+                  }
+                },
+                child: TextFormField(
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (double.tryParse('$value') != null) {
+                      if (double.tryParse('$value') < 1000)
+                        return "Income must be greater than 1000";
+                    } else {
+                      return null;
+                    }
+                  },
+                  controller: income,
+                  onChanged: (value) => income.text = value,
+                  decoration: InputDecoration(
+                      labelText: "What is your monthly earnings? (RON)"),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                  ], // Only numbers can be entered
+                ),
+              );
+            })));
+  }
+
+  Widget getImage() {
+    return GetImage();
+  }
+
+  Widget getLocation() {
+    return GetLocation();
+  }
+
   BoxDecoration boxDecorationCustom(Color color) {
     return BoxDecoration(
       color: color,
@@ -388,73 +567,6 @@ class _FormPartOneState extends State<FormPartTwo> {
           offset: Offset(0, 3), // changes position of shadow
         ),
       ],
-    );
-  }
-
-  _getFromGallery() async {
-    PickedFile pickedFile = await ImagePicker().getImage(
-      source: ImageSource.gallery,
-      maxWidth: 200,
-      maxHeight: 100,
-    );
-    if (pickedFile != null) {
-      _image = File(pickedFile.path);
-      setState(() {});
-    }
-  }
-
-  _getLocation() async {
-    Location location = Location.
-
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
-
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-  }
-}
-
-class Completed extends StatefulWidget {
-  const Completed({
-    Key key,
-    @required this.maxCompleted,
-  }) : super(key: key);
-
-  final double maxCompleted;
-
-  @override
-  _CompletedState createState() => _CompletedState();
-}
-
-class _CompletedState extends State<Completed> {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<StateFormModel>(
-      builder: (context, model, child) {
-        final double val = model.getNumber;
-        final double newVal = (val * 0.4 / 3 * 100).roundToDouble();
-        return Text(
-          "completed: $newVal%",
-          style: TextStyle(
-              fontFamily: 'Newsreader',
-              fontSize: 20,
-              color: Colors.blueGrey[700]),
-        );
-      },
     );
   }
 }

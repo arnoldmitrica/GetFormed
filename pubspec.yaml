@@ -4,7 +4,7 @@ description: A new Flutter application.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -17,14 +17,24 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.0.0
   path_provider: ^2.0.1
-  image_picker: ^0.7.5
-  #location: ^3.0.0
+  flutter_dialogs: ^1.1.0
+  location: ^4.1.1
+  image_picker: ^0.7.5+2
+  async: ^2.6.1
+  flutter_native_splash: ^1.1.8+4
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner:
   hive_generator:
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/icons/splash.png"
+  android: true
+  ios: true
 
 flutter:
   uses-material-design: true

@@ -1,4 +1,3 @@
-//import 'package:hive/hive.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'formModel.dart';
@@ -18,21 +17,18 @@ class FormModelAdapter extends TypeAdapter<FormModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return FormModel()
-      ..amountOfMoney = fields[0] as double
-      ..time = fields[1] as String
-      ..motive = fields[2] as String;
+      ..values = (fields[0] as Map)?.cast<String, dynamic>()
+      ..image = fields[1] as dynamic;
   }
 
   @override
   void write(BinaryWriter writer, FormModel obj) {
     writer
-      ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.amountOfMoney)
-      ..writeByte(1)
-      ..write(obj.time)
       ..writeByte(2)
-      ..write(obj.motive);
+      ..writeByte(0)
+      ..write(obj.values)
+      ..writeByte(1)
+      ..write(obj.image);
   }
 
   @override

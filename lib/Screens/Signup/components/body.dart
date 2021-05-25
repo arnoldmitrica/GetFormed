@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mi_card/Screens/HomeScreen/loggedInHomeScreen.dart';
 import 'package:mi_card/Screens/Login/login_screen.dart';
 import 'package:mi_card/Screens/Signup/components/background.dart';
 import 'package:mi_card/Screens/Signup/components/or_divider.dart';
@@ -11,6 +12,7 @@ import 'package:mi_card/components/rounded_password_field.dart';
 import 'package:mi_card/components/utils/checkCredentials.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Body extends StatefulWidget {
   @override
@@ -20,7 +22,9 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   TextEditingController username = TextEditingController();
 
-  TextEditingController password = TextEditingController();
+  TextEditingController _password = TextEditingController();
+  TextEditingController _confirmPassword = TextEditingController();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +45,51 @@ class _BodyState extends State<Body> {
               "assets/icons/signup.svg",
               height: size.height * 0.35,
             ),
-            RoundedInputField(
-              hintText: "Your Email",
-              onChanged: (value) {
-                username.text = value;
-              },
-            ),
-            RoundedPasswordField(
-              onChanged: (value) {
-                password.text = value;
-              },
+            Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  RoundedInputField(
+                    func: nameValidator,
+                    hintText: "Your username",
+                    onChanged: (value) {
+                      username.text = value;
+                    },
+                  ),
+                  RoundedPasswordField(
+                    func: passValidator,
+                    onChanged: (value) {
+                      _password.text = value;
+                    },
+                  ),
+                  RoundedPasswordField(
+                    func: (String value) {
+                      if (value.isEmpty) {
+                        return "Please Re-Enter Password";
+                      } else if (value.length < 6) {
+                        return "Password must be atleast 6 characters long";
+                      } else if (value != _password.text) {
+                        return "Password must be same as above";
+                      } else {
+                        return null;
+                      }
+                    },
+                    onChanged: (value) {
+                      _confirmPassword.text = value;
+                    },
+                  ),
+                ],
+              ),
             ),
             RoundedButton(
+              color: Colors.blue[200],
+              textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Newsreader'),
               text: "Sign up",
               press: () {
                 _navigator();
@@ -64,7 +101,8 @@ class _BodyState extends State<Body> {
             AlreadyHaveAnAccountCheck(
                 login: false,
                 press: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) {
                     return LoginScreen();
                   }));
                 }),
@@ -94,10 +132,27 @@ class _BodyState extends State<Body> {
   //   });
   // }
 
+  Function(String) nameValidator = (String name) {
+    if (name.isEmpty) {
+      return "Name must not be empty ";
+    }
+    if (name.length < 3) return "Name must have more than 3 characters";
+    if (name.contains("  ") || (name.contains(" ")))
+      return "Name must not have empty spaces";
+    return null;
+  };
+
+  Function(String) passValidator = (String pass) {
+    if (pass.isEmpty && pass.length < 6) {
+      return "Name must not be empty and less than 6 characters";
+    }
+    return null;
+  };
+
   _navigator() async {
-    if (username.text.length != 0 || password.text.length != 0) {
+    if (_formKey.currentState.validate()) {
       try {
-        await getCrdntialsForSignup(username.text);
+        await setCrdntialsForSignup(username.text, _password.text);
         Fluttertoast.showToast(
           msg: "You logged in!",
           gravity: ToastGravity.BOTTOM,
@@ -106,6 +161,7 @@ class _BodyState extends State<Body> {
           backgroundColor: Colors.green[300],
           //timeInSecForIosWeb: 2,
         );
+        await _setAccount();
       } catch (err) {
         print(err.toString());
         Fluttertoast.showToast(
@@ -117,25 +173,18 @@ class _BodyState extends State<Body> {
           //timeInSecForIosWeb: 2,
         );
       }
-    } else {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return CupertinoAlertDialog(
-              content: Text(
-                "username or password \ncan't be empty",
-                style: TextStyle(fontSize: 16.0),
-              ),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      print("Login pressed");
-                    },
-                    child: Text("Ok"))
-              ],
-            );
-          });
     }
+  }
+
+  _setAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("email", username.text);
+    Navigator.pushReplacement<void, void>(
+      context,
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) =>
+            LoggedInHomeScreen(email: username.text),
+      ),
+    );
   }
 }

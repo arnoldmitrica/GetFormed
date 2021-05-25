@@ -1,6 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
+import 'package:mi_card/Screens/FormPartOne/formPartOne.dart';
+import 'package:mi_card/Screens/FormPartTwo/formPartTwo.dart';
+import 'package:mi_card/Screens/ListForms/listcard.dart';
 import 'package:mi_card/components/utils/formModel.dart';
+import 'package:flutter/services.dart';
 
 class FormModelItemsList extends StatefulWidget {
   final String email;
@@ -15,6 +23,7 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
   _FormModelItemsListState(this.email);
   @override
   void initState() {
+    print("initState listviewforms");
     super.initState();
   }
 
@@ -24,20 +33,124 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
     print('ListView ${formBox.keys}');
 
     return Scaffold(
-      body: Container(
-        child: ListView.builder(
-          itemCount: formBox.length,
-          itemBuilder: (BuildContext context, int index) {
-            final form = formBox.get(index) as FormModel;
-            //final form = formBox[index];
-            return ListTile(
-              title: Text('motive: ${form.motive}'),
-              subtitle: Text('time: ${form.time}'),
-              trailing: Text('money: ${form.amountOfMoney}'),
-            );
-          },
+        appBar: AppBar(
+          title: Text("Forms list"),
         ),
-      ),
+        body: Container(
+            child: formBox.isNotEmpty
+                ? ListView.builder(
+                    itemCount: formBox.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final form = formBox.getAt(index) as FormModel;
+                      File image;
+                      try {
+                        final val = File(form.values["imagePath"]).existsSync();
+                        if (val == false) {
+                          image = null;
+                          throw ErrorDescription("No image");
+                        } else {
+                          image = File(form.values["imagePath"]);
+                        }
+                      } catch (err) {
+                        print(err.toString());
+                      }
+                      //final form = formBox[index];
+                      return Dismissible(
+                          key: UniqueKey(),
+                          onDismissed: (direction) {
+                            // Remove the item from the data source.
+                            setState(() {
+                              formBox.deleteAt(index);
+                            });
+                          },
+                          background: Container(
+                            color: Colors.red,
+                          ),
+                          child: InkWell(
+                            onTap: () => showFormValidationDialog(
+                                context, form.values["completed"], index),
+                            child: Cardlist(form, image),
+                          )
+                          //       context, form.values["completed"], index),
+                          // )),
+                          // child: ListTile(
+                          //   // leading: Text(
+                          //   //   'Name: ${form.values["firstName"]} - ${form.values["lastName"]}',
+                          //   // ),
+                          //   title: Padding(
+                          //       padding: EdgeInsets.symmetric(
+                          //           horizontal:
+                          //               MediaQuery.of(context).size.width / 20),
+                          //       child: (image != null)
+                          //           ? Image.file(image)
+                          //           : SvgPicture.asset(
+                          //               "assets/icons/noimage.svg")),
+                          //   subtitle: Column(
+                          //     mainAxisAlignment: MainAxisAlignment.start,
+                          //     children: [
+                          //       Text('time: ${form.values["time"]}'),
+                          //       Text('motive: ${form.values["motive"]}'),
+                          //       Text(
+                          //           'Amount of money to loan: ${form.values["amountOfMoney"]}')
+                          //     ],
+                          //   ),
+                          //   trailing: Icon(Icons.keyboard_arrow_right),
+                          //   onTap: () => showFormValidationDialog(
+                          //       context, form.values["completed"], index),
+                          // ),
+                          );
+                    })
+                : Center(child: SvgPicture.asset("assets/icons/noimage.svg"))));
+  }
+
+  Future<dynamic> showFormValidationDialog(
+      BuildContext context, int formCompleted, int index) {
+    return showPlatformDialog(
+      context: context,
+      builder: (dialogContext) => BasicDialogAlert(
+          title: Text("Open form."),
+          content: Text("Choose what validation section to open"),
+          actions: <Widget>[
+            BasicDialogAction(
+              title: Text("First validation"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FormPartOne(email, index)));
+              },
+            ),
+            formCompleted >= 4
+                ? BasicDialogAction(
+                    title: Text("Second validation"),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FormPartTwo(email, index)));
+                    },
+                  )
+                : BasicDialogAction(),
+            BasicDialogAction(
+              title: Text("Close"),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+            ),
+          ]),
     );
+  }
+}
+
+class MyClipper extends CustomClipper<Rect> {
+  @override
+  Rect getClip(Size size) {
+    // TODO: implement getClip
+    return Rect.fromLTWH(0, 0, 200, 100);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    // TODO: implement shouldReclip
   }
 }

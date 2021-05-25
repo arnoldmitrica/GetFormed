@@ -17,10 +17,21 @@ class Body extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              "Welcome to myLoans",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            RichText(
+                text: TextSpan(children: <TextSpan>[
+              TextSpan(
+                  text: 'Welcome to \n',
+                  style: TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
+              TextSpan(
+                  text: "MyloansApp",
+                  style: TextStyle(
+                      fontSize: 33,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo[900])),
+            ])),
             SizedBox(height: size.height * 0.02),
             SvgPicture.asset(
               "assets/icons/welcomesvg.svg",
@@ -29,6 +40,8 @@ class Body extends StatelessWidget {
             SizedBox(height: size.height * 0.03),
             RoundedButton(
               text: "Login",
+              color: kPrimaryColor,
+              textStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               press: () {
                 Navigator.push(
                   context,
@@ -43,8 +56,8 @@ class Body extends StatelessWidget {
             SizedBox(height: size.height * 0.03),
             RoundedButton(
                 text: "Sign up",
-                color: kPrimaryLightColor,
-                textColor: Colors.black,
+                color: Colors.lightBlue[800],
+                textStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 press: () {
                   Navigator.push(
                     context,

@@ -22,27 +22,24 @@ class _ModelItemsState extends State<ModelItems> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Welcome",
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Your last forms"),
-        ),
-        body: FutureBuilder(
-          future: Hive.openBox(email),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError)
-                return Text(snapshot.error.toString());
-              else
-                return FormModelItemsList(email);
-            }
-            // Although opening a Box takes a very short time,
-            // we still need to return something before the Future completes.
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Your last forms"),
+      ),
+      body: FutureBuilder(
+        future: Hive.openBox(email),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError)
+              return Text(snapshot.error.toString());
             else
-              return Scaffold();
-          },
-        ),
+              return FormModelItemsList(email);
+          }
+          // Although opening a Box takes a very short time,
+          // we still need to return something before the Future completes.
+          else
+            return Scaffold();
+        },
       ),
     );
   }

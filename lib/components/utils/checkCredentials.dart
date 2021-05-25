@@ -1,9 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<String> getCrdntialsForSignup(String username) async {
+Future<String> setCrdntialsForSignup(String username, String password) async {
   final sharedPreferences = await SharedPreferences.getInstance();
 
   if (sharedPreferences.getString(username) == null) {
+    sharedPreferences.setString(username, password);
     return Future.delayed(
         Duration(seconds: 2), () => 'Account created. You logged in.');
   } else {

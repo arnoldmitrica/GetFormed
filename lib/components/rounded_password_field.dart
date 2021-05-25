@@ -4,12 +4,15 @@ import 'package:mi_card/constants.dart';
 
 class RoundedPasswordField extends StatelessWidget {
   final ValueChanged<String> onChanged;
-  const RoundedPasswordField({Key key, this.onChanged}) : super(key: key);
+  final String Function(String) func;
+  const RoundedPasswordField({Key key, this.onChanged, this.func})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFieldContainer(
-      child: TextField(
+      child: TextFormField(
+        validator: func,
         obscureText: true,
         onChanged: onChanged,
         decoration: InputDecoration(
