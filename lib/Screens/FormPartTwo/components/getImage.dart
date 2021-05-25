@@ -28,8 +28,6 @@ class _GetImageState extends State<GetImage> {
           final val = File(form.model.values["imagePath"]).existsSync();
           if (val == false) {
             _image = null;
-            Provider.of<ViewModel>(imageContext, listen: false)
-                .updateCompletePercentState("imagePath", null);
             throw ErrorDescription("No image");
           } else {
             _image = File(form.model.values["imagePath"]);
@@ -44,7 +42,11 @@ class _GetImageState extends State<GetImage> {
               onPressed: () => _getFromGallery(),
               child: Text("Upload image"),
             ),
-            _image == null ? Text('No image selected.') : Image.file(_image),
+            _image == null
+                ? Text('No image selected.')
+                //Provider.of<ViewModel>(imageContext, listen: false)
+                //.updateCompletePercentState("imagePath", null)
+                : Image.file(_image),
           ],
         );
       }),
