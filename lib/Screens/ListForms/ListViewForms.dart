@@ -7,8 +7,11 @@ import 'package:hive/hive.dart';
 import 'package:mi_card/Screens/FormPartOne/formPartOne.dart';
 import 'package:mi_card/Screens/FormPartTwo/formPartTwo.dart';
 import 'package:mi_card/Screens/ListForms/listcard.dart';
+import 'package:mi_card/components/utils/ViewModel.dart';
 import 'package:mi_card/components/utils/formModel.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class FormModelItemsList extends StatefulWidget {
   final String email;
@@ -34,43 +37,51 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
         appBar: AppBar(
           title: Text("Forms list"),
         ),
-        body: Container(
-            child: formBox.isNotEmpty
-                ? ListView.builder(
-                    itemCount: formBox.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final form = formBox.getAt(index) as FormModel;
-                      File image;
-                      try {
-                        final val = File(form.values["imagePath"]).existsSync();
-                        if (val == false) {
-                          image = null;
-                          throw ErrorDescription("No image");
-                        } else {
-                          image = File(form.values["imagePath"]);
-                        }
-                      } catch (err) {
-                        print(err.toString());
-                      }
-                      //final form = formBox[index];
-                      return Dismissible(
-                          key: UniqueKey(),
-                          onDismissed: (direction) {
-                            // Remove the item from the data source.
-                            setState(() {
-                              formBox.deleteAt(index);
-                            });
-                          },
-                          background: Container(
-                            color: Colors.red,
-                          ),
-                          child: InkWell(
-                            onTap: () => showFormValidationDialog(
-                                context, form.values["completed"], index),
-                            child: Cardlist(form, image),
-                          ));
-                    })
-                : Center(child: SvgPicture.asset("assets/icons/noimage.svg"))));
+        body: formBox.isNotEmpty
+            ? Container(
+                alignment: Alignment.center,
+                child: ValueListenableBuilder(
+                    valueListenable: Hive.box(email).listenable(),
+                    builder: (valueContext, form, child) {
+                      return ListView.builder(
+                          itemCount: formBox.length,
+                          itemBuilder: (BuildContext listContext, int index) {
+                            final form = formBox.getAt(index) as FormModel;
+                            File image;
+                            try {
+                              final val =
+                                  File(form.values["imagePath"]).existsSync();
+                              if (val == false) {
+                                image = null;
+                                throw ErrorDescription("No image");
+                              } else {
+                                image = File(form.values["imagePath"]);
+                              }
+                            } catch (err) {
+                              print(err.toString());
+                            }
+                            //final form = formBox[index];
+                            return Dismissible(
+                              key: UniqueKey(),
+                              onDismissed: (direction) {
+                                // Remove the item from the data source.
+                                setState(() {
+                                  formBox.deleteAt(index);
+                                });
+                              },
+                              background: Container(
+                                color: Colors.red,
+                              ),
+                              child: InkWell(
+                                onTap: () => showFormValidationDialog(
+                                    context, form.values["completed"], index),
+                                child: Cardlist(form, image),
+                              ),
+                            );
+                          });
+                    }),
+              )
+            : Center(child: SvgPicture.asset("assets/icons/noimage.svg")));
   }
 
   Future<dynamic> showFormValidationDialog(
@@ -100,7 +111,10 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
                               builder: (context) => FormPartTwo(email, index)));
                     },
                   )
-                : BasicDialogAction(),
+                : Container(
+                    width: 0,
+                    height: 0,
+                  ),
             BasicDialogAction(
               title: Text("Close"),
               onPressed: () {
