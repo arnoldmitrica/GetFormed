@@ -40,7 +40,6 @@ class ViewModel extends ChangeNotifier {
       model = FormModel();
       model.values.addAll(incompleteState);
       _updateDB();
-      print(box.length);
       model.values["index"] = box.keys.length - 1;
       finalIndex = box.keys.length - 1;
     }
@@ -71,14 +70,8 @@ class ViewModel extends ChangeNotifier {
     } else {
       try {
         await box.putAt(finalIndex, model);
-        print(model.values);
       } catch (e) {
-        print(e);
-
         box.add(model);
-        print(box.length);
-        print(box.values);
-        //box.put(finalIndex, map);
         finalIndex = box.length - 1;
       }
     }
@@ -86,7 +79,6 @@ class ViewModel extends ChangeNotifier {
 
   Future<void> updateDbAndListener() async {
     _updateDB();
-    //WidgetsFlutterBinding.ensureInitialized();
     notifyListeners();
   }
 }

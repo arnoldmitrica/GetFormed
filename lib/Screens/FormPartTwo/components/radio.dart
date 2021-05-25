@@ -52,14 +52,10 @@ class _RadioState extends State<RadioW> {
                 setState(() {
                   for (int i = 0; i < _radioModels.length; i++) {
                     _radioModels[i].selected = false;
-                    //print('_radioModels[i] ${_radioModels[i].text}');
-                    //print('val $val');
                   }
                   _value2 = val;
                   _radioModels[i].selected = true;
-                  print(_groupName);
-                  print('_radioModels[i] ${_radioModels[i].text}');
-                  print('val $val');
+
                   //form.model.values["status"] == null
                   form.updateCompletePercentState(
                       _groupName, {val - 1: _radioModels[i].text});

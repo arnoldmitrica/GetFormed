@@ -23,14 +23,12 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
   _FormModelItemsListState(this.email);
   @override
   void initState() {
-    print("initState listviewforms");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final formBox = Hive.box(email);
-    print('ListView ${formBox.keys}');
 
     return Scaffold(
         appBar: AppBar(
@@ -70,35 +68,7 @@ class _FormModelItemsListState extends State<FormModelItemsList> {
                             onTap: () => showFormValidationDialog(
                                 context, form.values["completed"], index),
                             child: Cardlist(form, image),
-                          )
-                          //       context, form.values["completed"], index),
-                          // )),
-                          // child: ListTile(
-                          //   // leading: Text(
-                          //   //   'Name: ${form.values["firstName"]} - ${form.values["lastName"]}',
-                          //   // ),
-                          //   title: Padding(
-                          //       padding: EdgeInsets.symmetric(
-                          //           horizontal:
-                          //               MediaQuery.of(context).size.width / 20),
-                          //       child: (image != null)
-                          //           ? Image.file(image)
-                          //           : SvgPicture.asset(
-                          //               "assets/icons/noimage.svg")),
-                          //   subtitle: Column(
-                          //     mainAxisAlignment: MainAxisAlignment.start,
-                          //     children: [
-                          //       Text('time: ${form.values["time"]}'),
-                          //       Text('motive: ${form.values["motive"]}'),
-                          //       Text(
-                          //           'Amount of money to loan: ${form.values["amountOfMoney"]}')
-                          //     ],
-                          //   ),
-                          //   trailing: Icon(Icons.keyboard_arrow_right),
-                          //   onTap: () => showFormValidationDialog(
-                          //       context, form.values["completed"], index),
-                          // ),
-                          );
+                          ));
                     })
                 : Center(child: SvgPicture.asset("assets/icons/noimage.svg"))));
   }

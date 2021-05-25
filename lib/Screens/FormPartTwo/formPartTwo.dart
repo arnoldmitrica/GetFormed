@@ -33,9 +33,7 @@ class _FormPartTwoState extends State<FormPartTwo> {
   int index;
   String email;
   _FormPartTwoState(this.email, this.index, {this.box}) {
-    if (index != null) {
-      print('index = $index');
-    }
+    if (index != null) {}
   }
 
   Random random = Random();
@@ -63,10 +61,6 @@ class _FormPartTwoState extends State<FormPartTwo> {
 
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setEnabledSystemUIOverlays([]);
-    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //   statusBarColor: Colors.transparent,
-    // ));
     final double topBottom = 70;
     double maxCompleted;
     final size = MediaQuery.of(context).size.height;
@@ -127,11 +121,7 @@ class _FormPartTwoState extends State<FormPartTwo> {
                         SizedBox(
                           height: 50,
                         ),
-                        //style: Theme.of(context).textTheme.headline2),
-                        Form(
-                            key: _formKey,
-                            //autovalidateMode: AutovalidateMode.onUserInteraction,
-                            child: formPartTwoBody()),
+                        Form(key: _formKey, child: formPartTwoBody()),
                       ],
                     ),
                   ),
@@ -146,23 +136,19 @@ class _FormPartTwoState extends State<FormPartTwo> {
   }
 
   Column formPartTwoBody() {
-    return Column(
-        //alignment: Alignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            decoration: boxDecorationCustom(Colors.white),
-            padding: EdgeInsets.symmetric(vertical: 25.0),
-            //color: Colors.blue[100],
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: renderForm(),
-              ),
-            ),
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Container(
+        decoration: boxDecorationCustom(Colors.white),
+        padding: EdgeInsets.symmetric(vertical: 25.0),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: renderForm(),
           ),
-        ]);
+        ),
+      ),
+    ]);
   }
 
   List<Widget> renderForm() {
@@ -185,13 +171,10 @@ class _FormPartTwoState extends State<FormPartTwo> {
   }
 
   Widget getFirstNameButton() {
-    print("firstNameeee");
-
     return Builder(builder: (firstNamecontext) {
       return FocusScope(
         onFocusChange: (focus) {
           if (focus == false) {
-            print("lost focus firstname");
             Provider.of<ViewModel>(firstNamecontext, listen: false)
                 .updateCompletePercentState("firstName", firstName.text);
           }
@@ -220,12 +203,10 @@ class _FormPartTwoState extends State<FormPartTwo> {
   };
 
   Widget getLastName() {
-    print("lastNameee");
     return Builder(builder: (lastNamecontext) {
       return FocusScope(
         onFocusChange: (focus) {
           if (focus == false) {
-            print("lost focus lastname");
             Provider.of<ViewModel>(lastNamecontext, listen: false)
                 .updateCompletePercentState("lastName", lastName.text);
           }
@@ -456,12 +437,7 @@ class _FormPartTwoState extends State<FormPartTwo> {
   }
 
   Widget getTitleJob() {
-    print("titleJobbbbbbeeeeeee");
     return Builder(builder: (titleContext) {
-      print("titleJobbbbbb");
-      // jobTitle.text = Provider.of<ViewModel>(titleContext, listen: false)
-      //     .model
-      //     .values["jobTitle"];
       return FocusScope(
         onFocusChange: (focus) {
           if (focus == false) {
