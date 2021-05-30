@@ -1,6 +1,3 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
-
 extension extString on String {
   bool get isValidEmail {
     final emailRegExp =

@@ -3,7 +3,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mi_card/Screens/Welcome/welcome_screen.dart';
 import 'package:mi_card/components/rounded_button.dart';
-import 'package:mi_card/components/text_field_container.dart';
 
 class DescriptionScreen extends StatelessWidget {
   const DescriptionScreen({Key key}) : super(key: key);

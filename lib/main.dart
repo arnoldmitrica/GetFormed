@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mi_card/Screens/FormPartTwo/formPartTwo.dart';
 import 'package:mi_card/Screens/HomeScreen/home_screen.dart';
 import 'package:mi_card/components/utils/formModel.dart';
 import 'package:mi_card/constants.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:hive/hive.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

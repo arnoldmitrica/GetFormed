@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 //import 'package:mi_card/components/utils/locationDataModel.dart' as LocationDta;
-import 'package:flutter/services.dart';
 import 'package:mi_card/components/utils/ViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +20,7 @@ class _GetLocationState extends State<GetLocation> {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: size.width / 8),
         child: Builder(builder: (locationContext) {
+          print("Locatiooooon");
           final form =
               Provider.of<ViewModel>(locationContext, listen: false).model;
           _locationAltitudeLongitude = form.values["location"];

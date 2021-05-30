@@ -7,11 +7,8 @@ import 'package:hive/hive.dart';
 import 'package:mi_card/Screens/FormPartOne/formPartOne.dart';
 import 'package:mi_card/Screens/FormPartTwo/formPartTwo.dart';
 import 'package:mi_card/Screens/ListForms/listcard.dart';
-import 'package:mi_card/components/utils/ViewModel.dart';
 import 'package:mi_card/components/utils/formModel.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 class FormModelItemsList extends StatefulWidget {
   final String email;

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mi_card/components/utils/ViewModel.dart';
-import 'package:provider/provider.dart';
 
 typedef void StateCallback(int val);
 

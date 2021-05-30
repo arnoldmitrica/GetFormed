@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mi_card/components/utils/ViewModel.dart';
-import 'package:mi_card/components/utils/formModel.dart';
 import 'package:provider/provider.dart';
 
 class Completed extends StatefulWidget {

@@ -8,7 +8,7 @@ class ViewModel extends ChangeNotifier {
   bool isItNewIndex;
   int finalIndex;
   Map<String, dynamic> incompleteState = {
-    "amountOfMoney": null,
+    "amountOfMoney": "100",
     "firstName": null,
     "lastName": null,
     "time": null,
@@ -20,7 +20,7 @@ class ViewModel extends ChangeNotifier {
     "domain": null,
     "income": null,
     "location": null,
-    "completed": 0,
+    "completed": 1,
     "imagePath": null,
     "accepted": false,
     "index": null

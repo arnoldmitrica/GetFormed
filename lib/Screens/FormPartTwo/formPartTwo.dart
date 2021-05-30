@@ -1,13 +1,9 @@
-import 'dart:io';
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mi_card/Screens/FormPartOne/components/time_drawer.dart';
 import 'package:mi_card/Screens/FormPartTwo/components/getImage.dart';
 import 'package:mi_card/Screens/FormPartTwo/components/location.dart';
-import 'package:mi_card/Screens/FormPartTwo/components/title_job.dart';
 import 'package:mi_card/components/completedWidget.dart';
 import 'package:mi_card/components/rounded_input_field.dart';
 import 'package:mi_card/components/utils/ViewModel.dart';
@@ -16,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:mi_card/Screens/FormPartTwo/components/form_page.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 
 class FormPartTwo extends StatefulWidget {
@@ -83,11 +78,8 @@ class _FormPartTwoState extends State<FormPartTwo> {
               children: [
                 Container(
                   padding: EdgeInsets.only(bottom: topBottom),
-                  child: MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider(
-                          create: (context) => ViewModel(box, index))
-                    ],
+                  child: ChangeNotifierProvider(
+                    create: (context) => ViewModel(box, index),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -195,7 +187,6 @@ class _FormPartTwoState extends State<FormPartTwo> {
 
   Function(String) nameValidator = (String name) {
     if (name.isNotEmpty && name.length > 2) {
-      print('name $name');
       return null;
     } else {
       return "Name is invalid";
@@ -367,7 +358,6 @@ class _FormPartTwoState extends State<FormPartTwo> {
     return showPlatformDialog(
       context: context,
       builder: (dialogContext) {
-        print('val = $val');
         if (val != null && val <= 12 && val >= 11) {
           return BasicDialogAlert(
             title: Text("Make sure to upload image and location."),
@@ -499,12 +489,11 @@ class _FormPartTwoState extends State<FormPartTwo> {
                 child: TextFormField(
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    if (double.tryParse('$value') != null) {
-                      if (double.tryParse('$value') < 1000)
-                        return "Income must be greater than 1000";
-                    } else {
+                    if (double.tryParse('$value') !=
+                        null) if (double.tryParse('$value') < 1000) {
+                      return "Income must be greater than 1000";
+                    } else
                       return null;
-                    }
                   },
                   controller: income,
                   onChanged: (value) => income.text = value,

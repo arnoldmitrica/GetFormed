@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mi_card/Screens/FormPartTwo/formPartTwo.dart';
 import 'package:mi_card/components/completedWidget.dart';
 import 'package:mi_card/components/utils/ViewModel.dart';
-import 'package:mi_card/components/utils/formModel.dart';
 import 'package:mi_card/components/utils/listItemModel.dart';
 import 'package:provider/provider.dart';
 import 'components/slider_widget.dart';
@@ -51,11 +50,8 @@ class _FormPartOneState extends State<FormPartOne> {
         children: [
           Container(
             padding: EdgeInsets.only(bottom: topBottom),
-            child: MultiProvider(
-              providers: [
-                ChangeNotifierProvider(
-                    create: (context) => ViewModel(box, index)),
-              ],
+            child: ChangeNotifierProvider(
+              create: (context) => ViewModel(box, index),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -197,10 +193,6 @@ class _FormPartOneState extends State<FormPartOne> {
       padding: EdgeInsets.symmetric(horizontal: 45.0),
       child: Builder(
         builder: (buttoncontext) {
-          final finalIndex =
-              Provider.of<ViewModel>(buttoncontext, listen: false)
-                  .model
-                  .values["index"];
           return Container(
               width: MediaQuery.of(context).size.width,
               child: TextButton(

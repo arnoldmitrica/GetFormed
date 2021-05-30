@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mi_card/Screens/HomeScreen/loggedInHomeScreen.dart';
-import 'package:mi_card/Screens/Signup/signup_screen.dart';
 import 'package:mi_card/Screens/splashScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
